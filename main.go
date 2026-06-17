@@ -122,15 +122,23 @@ func renameFilesInOrder(inpPath string) {
 		if err != nil {
 			log.Fatalf("can not get files: %s", err)
 		}
+		cwd, err := os.Getwd()
+		if err != nil {
+			log.Fatalf("failed to get cwd: %v", err)
+		}
+		fmt.Println("current working directory : " + cwd)
 		for index, fileName := range files {
 			fileBase, fileExt := splitExt(fileName)
 			currNum := begSeq + index
 			numDigitsFstring := strconv.Itoa(numDigits)
 			formatStr := "%0" + numDigitsFstring + "d"
 			currNumStr := fmt.Sprintf(formatStr, currNum)
-			fileNameStr := rootName + currNumStr + fileExt
-			fmt.Printf("orig=%s, name=%s, new=%s\n", fileName, fileBase, fileNameStr)
-			copyFile(fileName, fileNameStr)
+			//inpPathShort := strings.ReplaceAll(inpPath, ".", "")
+			//destFileNameStr := cwd + inpPathShort + "/" + rootName + currNumStr + fileExt
+			sourceFileNameStr := inpPath + "/" + fileName
+			destFileNameStr := inpPath + "/" + rootName + currNumStr + fileExt
+			fmt.Printf("orig=%s, name=%s, new=%s\n", fileName, fileBase, destFileNameStr)
+			copyFile(sourceFileNameStr, destFileNameStr)
 		}
 		return
 	case "Q":
