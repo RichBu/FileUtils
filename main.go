@@ -93,6 +93,10 @@ func renameFilesInOrder(inpPath string) {
 	fmt.Println("\n\nRename files")
 	fmt.Println("Enter root name to use: ")
 	rootName := inputString()
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("failed to get cwd: %v", err)
+	}
 
 	fmt.Println("Beginning seq: ")
 	begSeqStr := inputString()
@@ -109,10 +113,11 @@ func renameFilesInOrder(inpPath string) {
 	}
 
 	fmt.Println("\nWill do:")
-	fmt.Printf("input path       : %s\n", inpPath)
-	fmt.Printf("root name        : %s\n", rootName)
-	fmt.Printf("begining sequence: %d\n", begSeq)
-	fmt.Printf("number of digits : %d\n", numDigits)
+	fmt.Printf("input path        : %s\n", inpPath)
+	fmt.Printf("root name         : %s\n", rootName)
+	fmt.Printf("begining sequence : %d\n", begSeq)
+	fmt.Printf("number of digits  : %d\n", numDigits)
+	fmt.Printf("current directory : %s\n", cwd)
 	fmt.Println("\nEnter (C)ontinue or (Q)uit")
 	commStr := inputString()
 	commStr = strings.ToUpper(commStr)
@@ -122,11 +127,6 @@ func renameFilesInOrder(inpPath string) {
 		if err != nil {
 			log.Fatalf("can not get files: %s", err)
 		}
-		cwd, err := os.Getwd()
-		if err != nil {
-			log.Fatalf("failed to get cwd: %v", err)
-		}
-		fmt.Println("current working directory : " + cwd)
 		for index, fileName := range files {
 			fileBase, fileExt := splitExt(fileName)
 			currNum := begSeq + index
@@ -135,6 +135,59 @@ func renameFilesInOrder(inpPath string) {
 			currNumStr := fmt.Sprintf(formatStr, currNum)
 			//inpPathShort := strings.ReplaceAll(inpPath, ".", "")
 			//destFileNameStr := cwd + inpPathShort + "/" + rootName + currNumStr + fileExt
+			sourceFileNameStr := inpPath + "/" + fileName
+			destFileNameStr := inpPath + "/" + rootName + currNumStr + fileExt
+			fmt.Printf("orig=%s, name=%s, new=%s\n", fileName, fileBase, destFileNameStr)
+			copyFile(sourceFileNameStr, destFileNameStr)
+		}
+		return
+	case "Q":
+		return
+	}
+}
+
+func mergeFiles(inpPath string) {
+	fmt.Println("\n\nMerge files")
+	fmt.Println("Enter full file name : ")
+	rootName := inputString()
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("failed to get cwd: %v", err)
+	}
+
+	fmt.Println("\nWill do:")
+	fmt.Printf("input path         : %s\n", inpPath)
+	fmt.Printf("output file        : %s\n", rootName)
+	fmt.Printf("current directory  : %s\n", cwd)
+	fmt.Println("\nEnter (C)ontinue, (M)erge, or (Q)uit")
+	commStr := inputString()
+	commStr = strings.ToUpper(commStr)
+	switch commStr {
+	case "C":
+		files, err := getFilesOnly(inpPath)
+		if err != nil {
+			log.Fatalf("can not get files: %s", err)
+		}
+		for _, fileName := range files {
+			fileBase, fileExt := splitExt(fileName)
+			sourceFileNameStr := inpPath + "/" + fileName
+			destFileNameStr := inpPath + "/" + rootName + currNumStr + fileExt
+			fmt.Printf("orig=%s, name=%s, new=%s\n", fileName, fileBase, destFileNameStr)
+			copyFile(sourceFileNameStr, destFileNameStr)
+		}
+		return
+	case "M":
+		files, err := getFilesOnly(inpPath)
+		if err != nil {
+			log.Fatalf("can not get files: %s", err)
+		}
+		fmt.Printf("merging these files: %s\n", cwd)
+		for _, fileName := range files {
+			fmt.Printf("\n", fileName, fileBase, destFileNameStr)
+		}
+
+		for _, fileName := range files {
+			fileBase, fileExt := splitExt(fileName)
 			sourceFileNameStr := inpPath + "/" + fileName
 			destFileNameStr := inpPath + "/" + rootName + currNumStr + fileExt
 			fmt.Printf("orig=%s, name=%s, new=%s\n", fileName, fileBase, destFileNameStr)
@@ -155,6 +208,10 @@ func main() {
 	commStr = strings.ToUpper(commStr)
 	switch commStr {
 	case "1":
+		inpFileDir := inputFileDirectory()
+		renameFilesInOrder(inpFileDir)
+		return
+	case "2":
 		inpFileDir := inputFileDirectory()
 		renameFilesInOrder(inpFileDir)
 		return
